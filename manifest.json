@@ -1,0 +1,21 @@
+{
+    "name": "Prayer Times - Namoz vaqtlari",
+    "version": "1.0.0",
+    "description": "Current time and Muslim's five prayer times based on regions in Uzbekistan, O'zbekiston viloyatlaridagi eaoehffae",
+    "manifest_version": 3,
+    "author": "Ibrohimov Muhammadyusuf",
+    "action":{
+        "default_popup": "index.html",
+        "default_title": "Namoz vaqtlari"
+    },
+    "icons": {
+        "128": "/assets/img/mat3.png"
+    },
+    "permissions": [
+        "alarms",
+        "notifications"
+    ],
+    "background": {
+        "service_worker" : "background.js"
+    }
+}
