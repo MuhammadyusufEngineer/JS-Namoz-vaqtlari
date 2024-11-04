@@ -1,41 +1,46 @@
-// chrome.alarms.create("10MinuteNotification", {
-//   periodInMinutes: 1
-// });
+// Listen for messages from content or popup scripts
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === "setPrayerAlarms" && message.prayerTimes) {
+      setPrayerAlarms(message.prayerTimes);
+  }
+});
 
-// chrome.alarms.onAlarm.addListener(function() {
-//   if (alarm.name === "10MinuteNotification") {
-//     let options = {
-//       type: "basic",
-//       title: "10 Minute Notification",
-//       message: "It's been 10 minutes!",
-//       iconUrl: "./assets/img/mat3.png"
-//     };
-//   }
+// Create alarms for each prayer time
+function setPrayerAlarms(prayerTimes) {
+  // Clear existing alarms
+  chrome.alarms.clearAll();
 
-//       let audio = new Audio('Takbir.mp3')
-//       audio.play()
-// });
-function createNotification() {
-  // Define the notification options
-  const options = {
-    type: 'basic',
-    title: 'My Notification',
-    message: 'This is my notification message!',
-    iconUrl: './assets/img/mat3.png',
-    requireInteraction: true,
-    silent: false
-  };
+  // Loop through prayer times to set alarms
+  prayerTimes.forEach((time, index) => {
+      const prayerName = ["Bomdod", "Quyosh", "Peshin", "Asr", "Shom", "Xufton"][index];
 
-  // Play a notification sound
-  const audio = new Audio('./assets/Takbir.mp3');
-  audio.play();
+      // Set alarm time based on prayer time
+      const alarmTime = new Date();
+      const [hour, minute] = time.split(":");
+      alarmTime.setHours(parseInt(hour), parseInt(minute), 0);
 
-  // Create the notification
-  chrome.notifications.create('myNotification', options);
+      // Calculate time left until the prayer time
+      const timeLeft = alarmTime.getTime() - Date.now();
+      if (timeLeft > 0) {
+          chrome.alarms.create(prayerName, { when: Date.now() + timeLeft });
+      }
+  });
 }
 
-// Call createNotification initially to create the first notification
-createNotification();
+// Trigger notifications when an alarm goes off
+chrome.alarms.onAlarm.addListener((alarm) => {
+  const prayerName = alarm.name;
+  const options = {
+      type: 'basic',
+      title: `${prayerName} Vaqti Keldi!`,
+      message: `${prayerName} namozi vaqti kirib keldi.`,
+      iconUrl: './assets/img/mat3.png',
+      requireInteraction: true,
+      silent: false
+  };
+  chrome.notifications.create(`${prayerName}Notification`, options);
 
-// Call createNotification every minute to create subsequent notifications
-setInterval(createNotification, 60000); // 60000 milliseconds = 1 minute
+  // Play sound for each prayer time
+  const audio = new Audio('./assets/Takbir.mp3');
+  audio.play();
+});

@@ -116,7 +116,7 @@ function formatTime(time) {
 
 setInterval(() => {
     currentTimes()
-}, 1000)
+}, 60000)
 
 setInterval(() => {
     changeCardActive()
@@ -127,12 +127,16 @@ setInterval(() => {
 const baseUrl = 'https://islomapi.uz/api/present/'
 
 async function getPrayerTimes(region) {
-    const resp = await fetch(`${baseUrl}day?region=${region}`)
-    const result = await resp.json()
-    displayPrayerTimes(result)
-    window.localStorage.setItem('region', region)
+    const resp = await fetch(`${baseUrl}day?region=${region}`);
+    const result = await resp.json();
+    displayPrayerTimes(result);
+    window.localStorage.setItem('region', region);
 
+    // Send prayer times to background script
+    const prayerTimes = Object.values(result.times).slice(0, 6); // Adjust if prayer times have more items
+    chrome.runtime.sendMessage({ type: "setPrayerAlarms", prayerTimes });
 }
+
 
 const prayerTimes = document.querySelectorAll('.prayer-time')
 
